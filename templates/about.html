@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}About TextGen AI{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h1 class="display-5 mb-4">About TextGen AI</h1>
+                    
+                    <p class="lead">
+                        TextGen AI is an advanced text generation platform that leverages the power of 
+                        artificial intelligence to create high-quality, contextually relevant text 
+                        for a variety of purposes.
+                    </p>
+                    
+                    <hr class="my-4">
+                    
+                    <h3>Our Models</h3>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-primary text-white">
+                                    <h4 class="mb-0">GPT Model</h4>
+                                </div>
+                                <div class="card-body">
+                                    <p>Our GPT model employs transformer architecture for creative and contextually rich text generation. It excels at:</p>
+                                    <ul>
+                                        <li>Creating imaginative content</li>
+                                        <li>Maintaining context over longer texts</li>
+                                        <li>Adapting to various writing styles</li>
+                                        <li>Generating more nuanced responses</li>
+                                    </ul>
+                                    <p>Ideal for creative writing, storytelling, and complex content generation.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-info text-white">
+                                    <h4 class="mb-0">LSTM Model</h4>
+                                </div>
+                                <div class="card-body">
+                                    <p>Our LSTM (Long Short-Term Memory) model is optimized for focused and structured text generation. It performs well for:</p>
+                                    <ul>
+                                        <li>Technical writing</li>
+                                        <li>Information-dense content</li>
+                                        <li>Consistent output</li>
+                                        <li>More predictable text patterns</li>
+                                    </ul>
+                                    <p>Best suited for technical documentation, factual descriptions, and more structured content.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3 class="mt-4">How It Works</h3>
+                    <p>
+                        TextGen AI processes your prompt through sophisticated neural networks that have been trained on diverse text corpora. 
+                        Our models analyze patterns, context, and semantics to generate text that is coherent and relevant to your input.
+                    </p>
+                    
+                    <div class="card bg-light mt-4 mb-4">
+                        <div class="card-body">
+                            <h4 class="card-title">The Process:</h4>
+                            <ol>
+                                <li>You provide a prompt or topic</li>
+                                <li>Our AI models analyze your input</li>
+                                <li>The selected model generates text based on learned patterns</li>
+                                <li>The system delivers the generated content</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <h3>User Benefits</h3>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="bg-success text-white rounded p-2 me-3">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
+                                <div>
+                                    <h5>Time Saving</h5>
+                                    <p>Generate content quickly, saving hours of writing time.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="bg-success text-white rounded p-2 me-3">
+                                    <i class="bi bi-lightning-charge"></i>
+                                </div>
+                                <div>
+                                    <h5>Inspiration</h5>
+                                    <p>Overcome writer's block with AI-generated ideas.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="bg-success text-white rounded p-2 me-3">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </div>
+                                <div>
+                                    <h5>Iteration</h5>
+                                    <p>Quickly generate multiple versions to refine your content.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="bg-success text-white rounded p-2 me-3">
+                                    <i class="bi bi-person-check"></i>
+                                </div>
+                                <div>
+                                    <h5>User Accounts</h5>
+                                    <p>Save your generation history and access it anytime.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <h3>Get Started Today</h3>
+                    <p>
+                        Experience the power of AI text generation by creating your first prompt. 
+                        {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary ms-2">Create an Account</a>
+                        or
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary ms-2">Log In</a>
+                        to save your generations.
+                        {% else %}
+                        <a href="{{ url_for('index') }}" class="btn btn-primary ms-2">Start Generating</a>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+{% endblock %}

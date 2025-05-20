@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+
+{% block title %}TextGen AI - AI Powered Text Generation{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-5">
+        <div class="col-md-8 offset-md-2 text-center">
+            <h1 class="display-4 mb-4">TextGen AI</h1>
+            <p class="lead">Generate high-quality text content using advanced AI models</p>
+            
+            {% if not current_user.is_authenticated %}
+            <div class="alert alert-info mt-3">
+                <i class="bi bi-info-circle"></i> 
+                <a href="{{ url_for('auth.login') }}">Log in</a> or 
+                <a href="{{ url_for('auth.register') }}">register</a> 
+                to save your generated text and access your history.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Text Generator</h3>
+                </div>
+                <div class="card-body">
+                    <form id="generationForm">
+                        <div class="mb-3">
+                            <label for="promptInput" class="form-label">Enter your prompt</label>
+                            <textarea id="promptInput" class="form-control" rows="4" 
+                                placeholder="Enter a topic or starting text..."
+                                {% if not current_user.is_authenticated %}title="Login to save your generations"{% endif %}
+                                required></textarea>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="modelSelect" class="form-label">Select model</label>
+                                <select id="modelSelect" class="form-select">
+                                    <option value="gpt" selected>GPT Model (Creative)</option>
+                                    <option value="lstm">LSTM Model (Focused)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="lengthRange" class="form-label">Text length: <span id="lengthValue">200</span> words</label>
+                                <input type="range" class="form-range" id="lengthRange" min="50" max="500" step="50" value="200">
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="topicSuggestions">
+                            <label class="form-label">Suggested topics:</label>
+                            <div class="topics-container d-flex flex-wrap gap-2">
+                                <!-- Topics will be added here via JavaScript -->
+                                <span class="badge bg-secondary loading-badge">Loading topics...</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="generateBtn">
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="loadingSpinner"></span>
+                                Generate Text
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4 shadow-sm" id="resultCard" style="display: none;">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Generated Text</h3>
+                    <button class="btn btn-sm btn-outline-light" id="copyBtn" title="Copy to clipboard">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="generatedText" class="generated-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+<style>
+    .topics-container {
+        max-height: 120px;
+        overflow-y: auto;
+    }
+    .topic-tag {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .topic-tag:hover {
+        transform: scale(1.05);
+    }
+    .generated-content {
+        white-space: pre-line;
+        line-height: 1.6;
+    }
+    /* Smooth fade in animation for result */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('generationForm');
+        const promptInput = document.getElementById('promptInput');
+        const modelSelect = document.getElementById('modelSelect');
+        const lengthRange = document.getElementById('lengthRange');
+        const lengthValue = document.getElementById('lengthValue');
+        const generateBtn = document.getElementById('generateBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const resultCard = document.getElementById('resultCard');
+        const generatedText = document.getElementById('generatedText');
+        const copyBtn = document.getElementById('copyBtn');
+        const topicSuggestions = document.getElementById('topicSuggestions');
+        
+        // Update the length value when slider is moved
+        lengthRange.addEventListener('input', function() {
+            lengthValue.textContent = this.value;
+        });
+        
+        // Handle form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show loading state
+            generateBtn.disabled = true;
+            loadingSpinner.classList.remove('d-none');
+            resultCard.style.display = 'none';
+            
+            // Prepare data for API request
+            const requestData = {
+                prompt: promptInput.value,
+                model_type: modelSelect.value,
+                length: parseInt(lengthRange.value)
+            };
+            
+            // Send request to the server
+            fetch('/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Display the generated text
+                if (data.error) {
+                    generatedText.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                } else {
+                    generatedText.textContent = data.generated_text;
+                }
+                
+                // Show the result card with animation
+                resultCard.style.display = 'block';
+                resultCard.classList.add('fade-in');
+                
+                // Scroll to result
+                resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                generatedText.innerHTML = `<div class="alert alert-danger">
+                    An error occurred. Please try again later.
+                </div>`;
+                resultCard.style.display = 'block';
+            })
+            .finally(() => {
+                // Reset button state
+                generateBtn.disabled = false;
+                loadingSpinner.classList.add('d-none');
+            });
+        });
+        
+        // Fetch and display topic suggestions
+        fetch('/topics')
+            .then(response => response.json())
+            .then(data => {
+                const topicsContainer = topicSuggestions.querySelector('.topics-container');
+                topicsContainer.innerHTML = '';
+                
+                // Add specific topics
+                if (data.specific_topics) {
+                    Object.keys(data.specific_topics).forEach(topic => {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge bg-primary topic-tag me-1 mb-1';
+                        badge.textContent = topic;
+                        badge.title = data.specific_topics[topic];
+                        badge.addEventListener('click', () => {
+                            promptInput.value = topic;
+                        });
+                        topicsContainer.appendChild(badge);
+                    });
+                }
+                
+                // Add category topics
+                if (data.categories) {
+                    Object.keys(data.categories).forEach(category => {
+                        const categoryLabel = document.createElement('span');
+                        categoryLabel.className = 'badge bg-secondary me-2 mb-1';
+                        categoryLabel.textContent = category + ':';
+                        topicsContainer.appendChild(categoryLabel);
+                        
+                        data.categories[category].slice(0, 5).forEach(keyword => {
+                            const badge = document.createElement('span');
+                            badge.className = 'badge bg-info topic-tag me-1 mb-1';
+                            badge.textContent = keyword;
+                            badge.addEventListener('click', () => {
+                                promptInput.value = keyword;
+                            });
+                            topicsContainer.appendChild(badge);
+                        });
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error loading topics:', error);
+                const topicsContainer = topicSuggestions.querySelector('.topics-container');
+                topicsContainer.innerHTML = '<span class="badge bg-danger">Failed to load topics</span>';
+            });
+        
+        // Copy to clipboard functionality
+        copyBtn.addEventListener('click', function() {
+            const textToCopy = generatedText.textContent;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                // Show success indicator
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                }, 2000);
+            });
+        });
+    });
+</script>
+{% endblock %}
