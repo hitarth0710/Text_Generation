@@ -13,6 +13,10 @@ TextGen AI harnesses cutting-edge neural network technology to generate remarkab
 
 ## 📸 Screenshots
 
+![image](https://github.com/user-attachments/assets/119c4eb5-d2e0-4015-8a0e-40d45f955454)
+![image](https://github.com/user-attachments/assets/4be39c4b-1a4d-4b74-957a-b61da5296395)
+![image](https://github.com/user-attachments/assets/7bfe0940-0192-4203-bbb6-e2d470c24e2f)
+![image](https://github.com/user-attachments/assets/9097ba88-5e9c-449c-9c9f-604158faab30)
 
 
 ## ✨ Key Features
